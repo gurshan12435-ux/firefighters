@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ThermalWatch AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#02080f;color:#dce6ee;font-family:Inter,Arial,sans-serif;font-size:12px}
+button,input,select{font:inherit}.app{height:100vh;display:grid;grid-template-columns:190px 1fr;grid-template-rows:42px 1fr;overflow:hidden;background:#02080f}
+.top{grid-column:1/-1;border-bottom:1px solid #1c2d3d;background:#050d15;display:flex;align-items:center;gap:16px;padding:0 10px;z-index:5}
+.menu{font-size:18px;color:#52b6ed}.logo{font-weight:700;letter-spacing:.4px}.logo span{display:block;font-size:8px;color:#8d9ba8;font-weight:400}.region,.topbtn{background:#08131e;border:1px solid #1c3041;color:#cbd5dd;border-radius:3px;padding:6px 10px}.region{margin-left:20px}.coords{margin-left:auto;color:#56c4e8;font-size:9px}.alertbtn{color:#ffbf38;border-color:#55421d}
+.side{grid-row:2;background:#030b13;border-right:1px solid #1c2c3a;padding:8px;display:flex;flex-direction:column;gap:3px}.nav{padding:10px 8px;border-radius:3px;cursor:pointer;color:#b5c0c9}.nav strong{display:block;font-size:9px;color:#e1e7eb}.nav small{font-size:8px;color:#70808e}.nav.active{background:#092238;border-left:2px solid #32a9e8}.nav em{float:right;font-style:normal;color:#40dd8a}.side-status{margin-top:auto;border:1px solid #1d303f;background:#06121c;padding:9px;font-size:8px;color:#83929e}.green{color:#3ee08a}
+main{grid-row:2;overflow:auto;padding:7px 9px 10px}.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.card{height:62px;border:1px solid #1b2d3d;background:#07131e;border-radius:3px;padding:8px 11px;position:relative}.label{font-size:8px;color:#a8b5c0}.value{font-size:17px;margin-top:6px}.delta{position:absolute;right:8px;bottom:9px;font-size:7px;color:#f05d54}.down{color:#32d782}
+.toolbar{margin-top:8px;border:1px solid #1b2d3d;background:#06111b;padding:8px;display:flex;gap:7px}.search{flex:1;background:#020a12;border:1px solid #182b3a;border-radius:2px;color:#d8e0e7;padding:7px 10px}.select,.filter{background:#07131e;border:1px solid #1d3040;color:#c7d1d9;padding:6px 9px;border-radius:2px}
+.timeline{border:1px solid #1b2d3d;border-top:0;background:#06111b;padding:7px 10px 10px}.timehead{display:flex;justify-content:space-between;font-size:8px;color:#b7c3cd}.track{height:4px;background:#234054;margin:9px 0;position:relative}.track:before{content:"";position:absolute;left:0;right:48%;height:100%;background:#179be2}.knob{width:10px;height:10px;background:#229fe3;border-radius:50%;position:absolute;top:-3px}.k1{left:0}.k2{left:25%}.k3{left:48%}.k4{right:0}.timeline-bottom{display:flex;align-items:center;gap:18px}.timezone{margin-left:auto;background:#07131e;border:1px solid #1b3040;padding:5px 9px}.live{color:#35d885}
+.viewer-grid{display:grid;grid-template-columns:2.1fr 1fr;gap:9px;margin-top:8px}.panel{border:1px solid #1b2e3e;background:#06111b;border-radius:3px;overflow:hidden}.panel-title{height:30px;border-bottom:1px solid #1a2c3a;padding:9px;font-size:8px;font-weight:600;color:#c5d0d8}.tabs{float:right;color:#718290;display:flex;gap:12px;font-weight:400}.tabs b{color:#fff}.mapbox{height:365px;position:relative}.map{height:100%;width:100%;filter:saturate(.9) brightness(.82)}.layers{position:absolute;z-index:500;left:9px;top:9px;background:#07111bdd;border:1px solid #172c3c;width:150px}.layers h4{margin:0;padding:9px;border-bottom:1px solid #203443;font-size:9px}.layers button{background:#0b4b79;border:0;color:#fff;padding:5px 7px;margin:7px;font-size:8px}.layer{padding:7px 9px;border-top:1px solid #172a38;font-size:8px}.layer i{display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:2px}.coord{position:absolute;right:9px;top:9px;z-index:500;background:#06101bd9;padding:7px;font-size:8px}.legend{position:absolute;right:10px;bottom:12px;z-index:500;background:#06101ae8;border:1px solid #203342;padding:9px;font-size:8px}.legend div{margin:5px 0}.sw{display:inline-block;width:8px;height:8px;margin-right:7px}
+.alerts{height:395px}.empty{height:calc(100% - 58px);display:flex;align-items:center;justify-content:center;color:#8795a2;font-size:11px}.alertfoot{border-top:1px solid #172a38;padding:9px;text-align:center;font-size:8px;color:#8b98a4}.dotg{display:inline-block;width:7px;height:7px;background:#38d981;border-radius:50%}.view{float:right;background:none;border:0;color:#4eb1ec;font-size:8px}
+.trend{margin-top:9px;height:146px}.trend-body{height:115px;padding:5px 12px;background:linear-gradient(180deg,#0a2942,#06131d)}svg{width:100%;height:100%}.axis{fill:#687988;font-size:8px}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}.top{grid-column:1;flex-wrap:wrap;height:auto;padding:8px}.coords,.region{display:none}.side{grid-row:2;display:flex;flex-direction:row;overflow:auto;border-right:0;border-bottom:1px solid #1c2c3a}.nav{min-width:125px}.side-status{display:none}main{grid-row:3}.cards{grid-template-columns:repeat(2,1fr)}.viewer-grid{grid-template-columns:1fr}.toolbar{flex-wrap:wrap}.search{min-width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="menu">☰</div><div class="logo">THERMALWATCH AI<span>Fire & Thermal Source Intelligence</span></div><select class="region"><option>All Regions</option><option>North India</option><option>West India</option></select><div class="coords">Lat: 31.6340°N, Lon: 75.8723°E | Zoom: 6 | FIRMS Active</div><button class="topbtn alertbtn" id="topAlerts">⚠ 3 New Alerts</button><button class="topbtn" id="clockBtn">May 28, 2025 14:32:45</button><button class="topbtn" id="modeBtn">♙ Analyst Mode⌄</button></header>
+<aside class="side">
+<div class="nav active" data-page="overview"><strong>♧ REAL-TIME OVERVIEW <em>LIVE</em></strong><small>Live Monitoring</small></div>
+<div class="nav" data-page="alerts"><strong>♧ THERMAL ALERTS <em style="color:#ff9c19">3 NEW</em></strong></div>
+<div class="nav" data-page="persistent"><strong>◉ PERSISTENT SOURCES</strong><small>Long-term Monitoring</small></div>
+<div class="nav" data-page="analytics"><strong>▥ INCIDENT ANALYTICS</strong><small>Patterns & Analysis</small></div>
+<div class="nav" data-page="satellite"><strong>◉ SATELLITE INSIGHTS</strong><small>Multi-sensor Data</small></div>
+<div class="nav" data-page="forecast"><strong>⌁ PREDICTION & FORECAST</strong><small>AI Models & Forecasting</small></div>
+<div class="nav" data-page="reports"><strong>▣ REPORTS & EXPORTS</strong><small>Data Reports & Downloads</small></div>
+<div class="nav" data-page="settings"><strong>⚙ SETTINGS & CONFIG</strong><small>System Configuration</small></div>
+<div class="side-status">SYSTEM STATUS: <b class="green">OPERATIONAL ●</b><br>99.9% Uptime<br><br>DATA FEED: <b class="green">ACTIVE ●</b><br>All Systems Nominal</div>
+</aside>
+<main>
+<div id="toast" style="position:fixed;right:18px;bottom:18px;z-index:9999;background:#0b1b28;border:1px solid #2a5873;color:#dff5ff;padding:11px 14px;border-radius:5px;display:none;box-shadow:0 8px 25px #0008"></div>
+<div id="pageOverlay" style="display:none;position:fixed;inset:42px 0 0 190px;z-index:800;background:#030b13ee;padding:18px;overflow:auto">
+  <div class="panel" style="max-width:1200px;margin:auto;min-height:90vh">
+    <div class="panel-title"><span id="pageTitle">Module</span><button id="closePage" class="view">✕ CLOSE</button></div>
+    <div id="pageContent" style="padding:18px"></div>
+  </div>
+</div>
+<div class="cards">
+<div class="card"><div class="label">ACTIVE THERMAL SOURCES</div><div class="value">1,254</div><div class="delta">▲ 12% vs yesterday</div></div>
+<div class="card"><div class="label">CONFIRMED FIRE INCIDENTS</div><div class="value">343</div><div class="delta">▲ 8% vs yesterday</div></div>
+<div class="card"><div class="label">PERSISTENT THERMAL SOURCES</div><div class="value">87</div><div class="delta down">▼ 5% vs yesterday</div></div>
+<div class="card"><div class="label">HIGH PRIORITY ALERTS</div><div class="value">21</div><div class="delta">▲ 23% vs yesterday</div></div>
+<div class="card"><div class="label">TOTAL AREA MONITORED</div><div class="value">8,473</div><div class="delta" style="color:#718391">sq km</div></div>
+<div class="card"><div class="label">TOTAL DATA POINTS</div><div class="value">24.7 GB</div><div class="delta" style="color:#718391">Satellite + Ground</div></div>
+</div>
+<div class="toolbar"><input id="search" class="search" placeholder="⌕  Search locations, ID, incidents, areas, districts, states..."><select class="select" id="radius"><option>Radius: 50km</option><option>Radius: 100km</option><option>Radius: 250km</option><option>Radius: 500km</option></select><select class="select" id="roi"><option>Polygon/ROI</option><option>Punjab ROI</option><option>Haryana ROI</option><option>Custom ROI</option></select><select class="select" id="dateRange"><option>Select Date Range</option><option>Today</option><option>Last 24 Hours</option><option>Last 7 Days</option><option>Last 30 Days</option></select><select class="select" id="satellite"><option>All Satellites (6)</option><option>VIIRS</option><option>MODIS</option><option>Sentinel-2</option><option>FIRMS</option></select><button class="filter" id="filtersBtn">⚱ Filters</button><button class="filter" id="reset">↻ Reset</button></div>
+<div class="timeline"><div class="timehead"><span>TIME FILTER</span><span>00:00 (Start)</span><span>23:59 (End)</span></div><div class="track"><i class="knob k1"></i><i class="knob k2"></i><i class="knob k3"></i><i class="knob k4"></i></div><div class="timeline-bottom"><span class="timezone">TIMEZONE: IST (UTC +5:30)⌄</span><label>☑ AUTO-REFRESH (30s)</label><span class="live">● Real-time</span><label>□ Historical</label></div></div>
+<div class="viewer-grid">
+<section class="panel"><div class="panel-title">♧ GEOSPATIAL VIEWER — THERMAL OVERVIEW <span class="tabs"><b>SATELLITE</b> TERRAIN HYBRID STREETS | BOUNDARIES FIRE PERIMETERS THERMAL POINTS</span></div>
+<div class="mapbox"><div id="map" class="map"></div>
+<div class="layers"><h4>LAYERS CONTROL <span style="float:right">×</span></h4><button id="addLayer">＋ ADD LAYER</button><div class="layer layer-toggle" data-layer="firms"><i style="background:#ef3d3d"></i>FIRMS Thermal <b style="float:right;color:#f44">■</b></div><div class="layer layer-toggle" data-layer="viirs"><i style="background:#258fe2"></i>VIIRS Thermal <b style="float:right;color:#278fe0">■</b></div><div class="layer layer-toggle" data-layer="modis"><i style="background:#32d887"></i>MODIS Thermal <b style="float:right;color:#32d887">■</b></div><div class="layer layer-toggle" data-layer="base"><i style="background:#2e80d4"></i>Base Map (Satellite) <b style="float:right;color:#268ce1">■</b></div></div>
+<div class="coord" id="coord">LAT: 31.6340° | LON: 75.8723° | ZOOM: 6</div>
+<div class="legend"><b>THERMAL INTENSITY (°C) & CONFIDENCE</b><div><i class="sw" style="background:#f33"></i>Very High (&gt;75°C) <i class="sw" style="background:#ff7518;margin-left:12px"></i>Medium (45–60°C)</div><div><i class="sw" style="background:#ff9b18"></i>High (60–75°C) <i class="sw" style="background:#3297df;margin-left:24px"></i>Low (0–45°C)</div><div style="color:#4bbbe8">Confidence: High (&gt;80%) | Med (50–80%) | Low (&lt;50%)</div></div></div></section>
+<section class="panel alerts"><div class="panel-title">♧ ACTIVE THREATS (21 TOTAL) <button class="view" id="viewAlerts">VIEW ALL ALERTS</button></div><div class="empty" id="alertText">No high-priority immediate warnings require action.</div><div class="alertfoot">Status: All Clear &nbsp;&nbsp; Monitoring: 21 incidents <i class="dotg"></i></div></section>
+</div>
+<section class="panel trend"><div class="panel-title">⌁ 7-DAY THERMAL ACTIVITY TREND & TEMPORAL ANALYSIS <span style="float:right;font-weight:400;color:#8a98a5">Source: NASA FIRMS Multi-satellite</span></div><div class="trend-body"><svg viewBox="0 0 1000 110" preserveAspectRatio="none"><g stroke="#173144" stroke-width="1"><path d="M35 15H990M35 40H990M35 65H990M35 90H990"/></g><path d="M35 28 C150 30,170 25,270 27 S410 24,510 26 S650 22,750 25 S880 20,990 23 L990 90 L35 90Z" fill="#1b75a044"/><path d="M35 28 C150 30,170 25,270 27 S410 24,510 26 S650 22,750 25 S880 20,990 23" fill="none" stroke="#178fcb" stroke-width="2"/><path d="M35 89 C160 89,190 87,290 89 S430 87,540 88 S680 86,790 88 S900 86,990 87" fill="none" stroke="#e67c1a" stroke-width="2"/><g class="axis"><text x="3" y="18">1.5K</text><text x="8" y="43">1K</text><text x="13" y="68">500</text><text x="17" y="93">0</text><text x="30" y="106">May 22</text><text x="170" y="106">May 23</text><text x="310" y="106">May 24</text><text x="450" y="106">May 25</text><text x="590" y="106">May 26</text><text x="730" y="106">May 27</text><text x="930" y="106">May 28</text></g></svg></div></section>
+</main></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const toast=(msg)=>{const t=$('#toast');t.textContent=msg;t.style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display='none',2200)};
+const map=L.map('map',{zoomControl:true,attributionControl:false}).setView([31.634,75.8723],6);
+const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18}).addTo(map);
+const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18});
+const pts=[
+[31.634,75.8723,'Punjab thermal source','#ef3d3d'],[31.48,76.1,'Persistent source','#ff9b18'],
+[30.9,75.8,'Ludhiana area','#258fe2'],[30.2,75.9,'Thermal point','#32d887'],
+[29.95,76.85,'Haryana incident','#ff7518'],[28.7,77.1,'Delhi region','#ef3d3d'],
+[32.2,76.3,'Himachal source','#ff9b18'],[29.39,76.96,'Panipat thermal source','#ef3d3d'],
+[21.63,73.0,'Ankleshwar source','#ff7518'],[22.47,70.07,'Jamnagar source','#258fe2']
+];
+const markers=[];
+pts.forEach(p=>{let icon=L.divIcon({className:'',html:`<div style="width:9px;height:9px;border-radius:50%;background:${p[3]};box-shadow:0 0 10px ${p[3]};border:1px solid #fff"></div>`,iconSize:[9,9],iconAnchor:[4,4]});
+markers.push(L.marker([p[0],p[1]],{icon}).addTo(map).bindPopup(`<b>${p[2]}</b><br>Thermal confidence: 87%<br>Source: NASA FIRMS`));});
+function switchBase(type){if(type==='osm'){if(map.hasLayer(sat))map.removeLayer(sat);osm.addTo(map)}else{if(map.hasLayer(osm))map.removeLayer(osm);sat.addTo(map)}}
+$$('.layer-toggle').forEach(el=>el.onclick=()=>{el.classList.toggle('off');const on=!el.classList.contains('off');toast(el.textContent.trim().replace('■','')+(on?' enabled':' hidden'));markers.forEach(m=>on?m.addTo(map):map.removeLayer(m));});
+$('#addLayer').onclick=()=>toast('Custom layer tool opened — demo mode');
+$('#filtersBtn').onclick=()=>toast(`Filters: ${$('#radius').value} • ${$('#roi').value} • ${$('#dateRange').value}`);
+['radius','roi','dateRange','satellite'].forEach(id=>$( '#'+id).onchange=()=>toast($( '#'+id).value+' selected'));
+$('#reset').onclick=()=>{ $('#search').value='';$('#coord').textContent='LAT: 31.6340° | LON: 75.8723° | ZOOM: 6';$('#radius').selectedIndex=0;$('#roi').selectedIndex=0;$('#dateRange').selectedIndex=0;$('#satellite').selectedIndex=0;map.setView([31.634,75.8723],6);toast('All filters reset')};
+$('#search').oninput=e=>$('#coord').textContent=e.target.value?'Searching: '+e.target.value:'LAT: 31.6340° | LON: 75.8723° | ZOOM: 6';
+$('#topAlerts').onclick=()=>openPage('alerts');
+$('#viewAlerts').onclick=()=>openPage('alerts');
+$('#modeBtn').onclick=()=>toast('Analyst Mode: advanced controls enabled');
+$('#clockBtn').onclick=()=>toast('System clock synchronized');
+
+function openPage(page){
+ const titles={overview:'Real-Time Overview',alerts:'Thermal Alerts',persistent:'Persistent Thermal Sources',analytics:'Incident Analytics',satellite:'Satellite Insights',forecast:'Prediction & Forecast',reports:'Reports & Exports',settings:'Settings & Config'};
+ const content={
+ alerts:`<h2>Thermal Alerts</h2><div class="cards"><div class="card"><div class="label">NEW ALERTS</div><div class="value">3</div></div><div class="card"><div class="label">HIGH PRIORITY</div><div class="value">21</div></div><div class="card"><div class="label">ACTIVE INCIDENTS</div><div class="value">343</div></div></div><br><div class="panel"><div class="panel-title">ALERT QUEUE</div><div style="padding:15px;line-height:2">🔴 Industrial fire — Punjab — High confidence<br>🟠 Persistent source — Haryana — Medium confidence<br>🔴 Thermal anomaly — Himachal Pradesh — High confidence</div></div>`,
+ persistent:`<h2>Persistent Sources</h2><p>Long-term thermal sources detected across monitored regions.</p><div class="panel" style="padding:15px">Punjab — 31 sources<br>Haryana — 19 sources<br>Gujarat — 17 sources<br>Himachal Pradesh — 11 sources<br>Other regions — 9 sources</div>`,
+ analytics:`<h2>Incident Analytics</h2><p>Pattern analysis, hourly activity and classification trends.</p><div class="panel" style="padding:15px"><b>7-Day trend</b><br><br>Thermal activity: +12.4%<br>Fire incidents: +8.0%<br>Persistent sources: -5.0%<br>Average AI confidence: 87.6%</div>`,
+ satellite:`<h2>Satellite Insights</h2><p>Switch between satellite data sources and review coverage.</p><div class="panel" style="padding:15px">NASA FIRMS ✓ Active<br>VIIRS ✓ Active<br>MODIS ✓ Active<br>Sentinel-2 ✓ Active<br>OpenStreetMap ✓ Active</div>`,
+ forecast:`<h2>Prediction & Forecast</h2><p>Demo AI forecast based on thermal persistence and historical activity.</p><div class="panel" style="padding:15px">Next 24h risk: <b style="color:#ff8d27">Moderate–High</b><br>Expected anomaly probability: 72%<br>Model: Random Forest + XGBoost ensemble</div>`,
+ reports:`<h2>Reports & Exports</h2><p>Generate a demo report or export current dashboard data.</p><button class="topbtn" onclick="toast('PDF report generated in demo mode')">Generate PDF Report</button> <button class="topbtn" onclick="toast('CSV export prepared in demo mode')">Export CSV</button>`,
+ settings:`<h2>Settings & Config</h2><p><label>☑ Auto-refresh (30s)</label></p><p><label>☑ Real-time alerts</label></p><p><label>☑ Satellite base layer</label></p><p><label>☑ AI confidence scoring</label></p><button class="topbtn" onclick="toast('Settings saved')">Save Settings</button>`
+ };
+ $('#pageTitle').textContent=titles[page]||'Module';$('#pageContent').innerHTML=content[page]||'<h2>Overview</h2><p>Dashboard overview is active.</p>';$('#pageOverlay').style.display='block';
+}
+$('#closePage').onclick=()=>$('#pageOverlay').style.display='none';
+$$('.nav').forEach(n=>n.onclick=()=>{ $$('.nav').forEach(x=>x.classList.remove('active'));n.classList.add('active');openPage(n.dataset.page);});
+</script>
+</body></html>
